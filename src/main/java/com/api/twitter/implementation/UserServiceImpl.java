@@ -9,9 +9,16 @@ import com.google.firebase.auth.FirebaseToken;
 import io.micrometer.common.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Date;
+import java.util.UUID;
+
 import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.FirebaseAuth;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -45,7 +52,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetailResponse getUserByTokenId(String userToken) throws Exception {
+    public User getUserByTokenId(String userToken) throws Exception {
         if (StringUtils.isNotBlank(userToken) && userToken.startsWith("Bearer ")) {
             userToken = userToken.substring(7);
         }
@@ -56,18 +63,75 @@ public class UserServiceImpl implements UserService {
                 throw new Exception("User not found");
             }
 
-            return convertToUserResponse(user);
+            return user;
         } catch (Exception e) {
             throw new Exception("Invalid token : " + e.getMessage());
         }
     }
 
-    private UserDetailResponse convertToUserResponse(User user) {
+    @Override
+    public UserDetailResponse convertToUserResponse(User user) throws Exception {
+        byte[] bannerImageByte = null;
+        if (StringUtils.isNotBlank(user.getBannerPicturePath())) {
+            bannerImageByte = Files.readAllBytes(Paths.get(user.getBannerPicturePath()));
+        }
+
+        byte[] profileImageByte = null;
+        if (StringUtils.isNotBlank(user.getProfilePicturePath())) {
+            profileImageByte = Files.readAllBytes(Paths.get(user.getProfilePicturePath()));
+        }
+
         return UserDetailResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .bio(user.getBio())
+                .profileImage(profileImageByte)
+                .bannerImage(bannerImageByte)
                 .registeredDate(user.getRegisteredDate())
                 .build();
+    }
+
+    @Override
+    public UserDetailResponse getUserById(String id) throws Exception {
+        User user = userRepository.getById(id);
+        UserDetailResponse response = convertToUserResponse(user);
+        return response;
+    }
+
+    @Override
+    public void updateProfile(User currentUser, MultipartFile profilePicture, MultipartFile bannerPicture, String bio) throws Exception {
+        String uploadDirectory = "/Users/dwinanto/Youtube/Twitter/twitter-backend/profile-picture";
+        File uploadDir = new File(uploadDirectory);
+        if (!uploadDir.exists()) {
+            uploadDir.mkdirs();
+        }
+
+        if (bannerPicture != null) {
+            String bannerPictureFilename = generateRandomFilename(bannerPicture);
+            String bannerPicturePath = uploadDirectory + File.separator + bannerPictureFilename;
+            bannerPicture.transferTo(new File(bannerPicturePath));
+            currentUser.setBannerPicturePath(bannerPicturePath);
+        }
+
+        if (profilePicture != null) {
+            String profilePictureFilename = generateRandomFilename(profilePicture);
+            String profilePicturePath = uploadDirectory + File.separator + profilePictureFilename;
+            profilePicture.transferTo(new File(profilePicturePath));
+            currentUser.setProfilePicturePath(profilePicturePath);
+        }
+
+        if (StringUtils.isNotBlank(bio)) {
+            currentUser.setBio(bio);
+        }
+
+        userRepository.save(currentUser);
+    }
+
+    private String generateRandomFilename(MultipartFile file) {
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String randomName = UUID.randomUUID().toString();
+        return randomName + extension;
     }
 }

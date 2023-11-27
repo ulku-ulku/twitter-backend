@@ -22,6 +22,9 @@ public class User {
     private static final String EMAIL = "email";
     private static final String FIREBASE_UID = "firebase_uid";
     private static final String REGISTERED_DATE = "registered_date";
+    private static final String BIO = "bio";
+    private static final String PROFILE_PICTURE_PATH = "profile_picture_path";
+    private static final String BANNER_PICTURE_PATH = "banner_picture_path";
 
     @Id
     @Column(name = User.ID)
@@ -41,4 +44,13 @@ public class User {
 
     @Column(name = User.REGISTERED_DATE)
     private Date registeredDate;
+
+    @Column(name = User.BIO)
+    private String bio;
+
+    @Column(name = User.BANNER_PICTURE_PATH)
+    private String bannerPicturePath;
+
+    @Column(name = User.PROFILE_PICTURE_PATH)
+    private String profilePicturePath;
 }

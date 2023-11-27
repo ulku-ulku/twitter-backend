@@ -16,4 +16,7 @@ public class UserDetailResponse {
     private String email;
     private String username;
     private Date registeredDate;
+    private String bio;
+    private byte[] profileImage;
+    private byte[] bannerImage;
 }
