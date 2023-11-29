@@ -12,7 +12,7 @@ public interface UserService {
 
     User getUserByTokenId(String userToken) throws Exception;
 
-    UserDetailResponse getUserById(String id) throws Exception;
+    UserDetailResponse getUserById(String id, User loggedInUser) throws Exception;
 
     void updateProfile(User currentUser, MultipartFile profilePicture, MultipartFile bannerPicture, String bio) throws Exception;
 }

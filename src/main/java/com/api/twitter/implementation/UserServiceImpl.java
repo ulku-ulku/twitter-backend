@@ -3,6 +3,7 @@ package com.api.twitter.implementation;
 import com.api.twitter.entity.User;
 import com.api.twitter.model.request.SignUpRequest;
 import com.api.twitter.model.response.UserDetailResponse;
+import com.api.twitter.repository.FollowerRepository;
 import com.api.twitter.repository.UserRepository;
 import com.api.twitter.service.UserService;
 import com.google.firebase.auth.FirebaseToken;
@@ -24,6 +25,9 @@ import org.springframework.web.multipart.MultipartFile;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private FollowerRepository followerRepository;
 
     @Override
     public void register(SignUpRequest signUpRequest) throws Exception {
@@ -81,6 +85,9 @@ public class UserServiceImpl implements UserService {
             profileImageByte = Files.readAllBytes(Paths.get(user.getProfilePicturePath()));
         }
 
+        long followers = followerRepository.countByFollowerUserId(user.getId());
+        long followees = followerRepository.countByFolloweeUserId(user.getId());
+
         return UserDetailResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -89,13 +96,18 @@ public class UserServiceImpl implements UserService {
                 .profileImage(profileImageByte)
                 .bannerImage(bannerImageByte)
                 .registeredDate(user.getRegisteredDate())
+                .followers(followers)
+                .followees(followees)
                 .build();
     }
 
     @Override
-    public UserDetailResponse getUserById(String id) throws Exception {
+    public UserDetailResponse getUserById(String id, User loggedInUser) throws Exception {
         User user = userRepository.getById(id);
+        boolean isFollowing = followerRepository.existsByFollowerUserIdAndFolloweeUserId(id, loggedInUser.getId());
+
         UserDetailResponse response = convertToUserResponse(user);
+        response.setFollowing(isFollowing);
         return response;
     }
 

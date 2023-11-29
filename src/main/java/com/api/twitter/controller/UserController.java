@@ -47,7 +47,8 @@ public class UserController {
             @PathVariable("user_id") String userId
     ) throws Exception {
         try {
-            UserDetailResponse response = userService.getUserById(userId);
+            User loggedInUser = userService.getUserByTokenId(userToken);
+            UserDetailResponse response = userService.getUserById(userId, loggedInUser);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);

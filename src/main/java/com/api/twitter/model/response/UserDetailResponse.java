@@ -19,4 +19,7 @@ public class UserDetailResponse {
     private String bio;
     private byte[] profileImage;
     private byte[] bannerImage;
+    private boolean isFollowing;
+    private long followers;
+    private long followees;
 }
