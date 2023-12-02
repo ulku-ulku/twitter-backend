@@ -4,6 +4,7 @@ import com.api.twitter.entity.User;
 import com.api.twitter.model.request.CommentRequest;
 import com.api.twitter.model.response.CommentResponse;
 import com.api.twitter.service.CommentService;
+import com.api.twitter.service.NotificationService;
 import com.api.twitter.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,9 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PostMapping("/{post_id}")
     public ResponseEntity<String> addComment(
             @PathVariable("post_id") String postId,
@@ -29,6 +33,7 @@ public class CommentController {
         try {
             User loggedInUser = userService.getUserByTokenId(userToken);
             commentService.addComment(commentRequest.getComment(), postId, loggedInUser.getId());
+            notificationService.addNotification(loggedInUser.getUsername(), "commented", postId);
             return ResponseEntity.ok("Comment added successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -2,6 +2,7 @@ package com.api.twitter.controller;
 
 import com.api.twitter.entity.User;
 import com.api.twitter.service.LikeService;
+import com.api.twitter.service.NotificationService;
 import com.api.twitter.service.UserService;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,9 @@ public class LikeController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private NotificationService notificationService;
+
     @PostMapping("/{post_id}")
     public ResponseEntity<String> like (
         @RequestHeader("Authorization") String userToken,
@@ -25,6 +29,7 @@ public class LikeController {
         try {
             User loggedInUser = userService.getUserByTokenId(userToken);
             likeService.like(postId, loggedInUser.getId());
+            notificationService.addNotification(loggedInUser.getUsername(), "liked", postId);
             return ResponseEntity.ok("Like added successfully");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
