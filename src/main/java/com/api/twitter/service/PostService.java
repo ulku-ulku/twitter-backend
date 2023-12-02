@@ -12,4 +12,6 @@ public interface PostService {
     List<PostResponse> getAllPosts(User loggedInUser) throws Exception;
 
     PostResponse getById(String postId, User loggedInUser) throws Exception;
+
+    List<PostResponse> getPostsByUserId(String userId, User loggedInUser) throws Exception;
 }

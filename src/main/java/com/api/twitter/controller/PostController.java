@@ -62,4 +62,18 @@ public class PostController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/users/{user_id}")
+    public ResponseEntity<List<PostResponse>> getAllPostsByUserId(
+        @PathVariable("user_id") String userId,
+        @RequestHeader("Authorization") String userToken
+    ) throws Exception {
+        try {
+            User loggedInUser = userService.getUserByTokenId(userToken);
+            List<PostResponse> responses = postService.getPostsByUserId(userId, loggedInUser);
+            return ResponseEntity.ok(responses);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }

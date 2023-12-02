@@ -57,6 +57,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    public List<PostResponse> getPostsByUserId(String userId, User loggedInUser) throws Exception {
+        List<Post> posts = postRepository.findByUserId(userId);
+        List<PostResponse> responses = new ArrayList<>();
+
+        for (Post post : posts) {
+            User user = userRepository.getById(post.getUserId());
+            PostResponse response = setPostResponse(post, user, loggedInUser);
+            responses.add(response);
+        }
+
+        return responses;
+    }
+
+    @Override
     public PostResponse getById(String postId, User loggedInUser) throws Exception {
         Post post = postRepository.getById(postId);
         User user = userRepository.getById(post.getUserId());
