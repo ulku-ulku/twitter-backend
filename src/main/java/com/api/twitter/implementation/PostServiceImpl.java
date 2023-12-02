@@ -3,6 +3,7 @@ package com.api.twitter.implementation;
 import com.api.twitter.entity.Post;
 import com.api.twitter.entity.User;
 import com.api.twitter.model.response.PostResponse;
+import com.api.twitter.repository.CommentRepository;
 import com.api.twitter.repository.LikeRepository;
 import com.api.twitter.repository.PostRepository;
 import com.api.twitter.repository.UserRepository;
@@ -28,6 +29,9 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private LikeRepository likeRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     @Override
     public void post(String content, String userId) throws Exception {
         Post post = Post.builder()
@@ -52,6 +56,14 @@ public class PostServiceImpl implements PostService {
         return postResponseList;
     }
 
+    @Override
+    public PostResponse getById(String postId, User loggedInUser) throws Exception {
+        Post post = postRepository.getById(postId);
+        User user = userRepository.getById(post.getUserId());
+        PostResponse response = setPostResponse(post, user, loggedInUser);
+        return response;
+    }
+
     private PostResponse setPostResponse(Post post, User user, User loggedInUser) throws Exception {
         byte[] profileImageByte = null;
         if (StringUtils.isNotBlank(user.getProfilePicturePath())) {
@@ -67,6 +79,7 @@ public class PostServiceImpl implements PostService {
                 .profilePicture(profileImageByte)
                 .hasLiked(likeRepository.existsByPostIdAndUserId(post.getId(), loggedInUser.getId()))
                 .likeCount(likeRepository.countByPostId(post.getId()))
+                .commentCount(commentRepository.countByPostId(post.getId()))
                 .build();
     }
 }

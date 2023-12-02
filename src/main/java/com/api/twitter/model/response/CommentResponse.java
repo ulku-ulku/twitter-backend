@@ -11,14 +11,12 @@ import java.util.Date;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostResponse {
+public class CommentResponse {
     private String id;
-    private Date createdAt;
-    private String userId;
     private String username;
-    private String content;
-    private byte[] profilePicture;
-    private boolean hasLiked;
-    private long likeCount;
-    private long commentCount;
+    private String userId;
+    private String comment;
+    private String postId;
+    private Date createdAt;
+    private byte[] profileImage;
 }

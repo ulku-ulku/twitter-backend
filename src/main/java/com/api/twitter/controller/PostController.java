@@ -48,4 +48,18 @@ public class PostController {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
+    @GetMapping("/{post_id}")
+    public ResponseEntity<PostResponse> getPostById(
+        @RequestHeader("Authorization") String userToken,
+        @PathVariable("post_id") String postId
+    ) throws Exception {
+        try {
+            User loggedInUser = userService.getUserByTokenId(userToken);
+            PostResponse postResponse = postService.getById(postId, loggedInUser);
+            return ResponseEntity.ok(postResponse);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(null);
+        }
+    }
 }
