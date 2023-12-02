@@ -18,4 +18,6 @@ public class PostResponse {
     private String username;
     private String content;
     private byte[] profilePicture;
+    private boolean hasLiked;
+    private long likeCount;
 }

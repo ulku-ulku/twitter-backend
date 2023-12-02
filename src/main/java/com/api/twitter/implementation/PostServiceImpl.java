@@ -3,6 +3,7 @@ package com.api.twitter.implementation;
 import com.api.twitter.entity.Post;
 import com.api.twitter.entity.User;
 import com.api.twitter.model.response.PostResponse;
+import com.api.twitter.repository.LikeRepository;
 import com.api.twitter.repository.PostRepository;
 import com.api.twitter.repository.UserRepository;
 import com.api.twitter.service.PostService;
@@ -24,6 +25,9 @@ public class PostServiceImpl implements PostService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private LikeRepository likeRepository;
+
     @Override
     public void post(String content, String userId) throws Exception {
         Post post = Post.builder()
@@ -35,20 +39,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponse> getAllPosts() throws Exception {
+    public List<PostResponse> getAllPosts(User loggedInUser) throws Exception {
         List<Post> posts = postRepository.findAll();
         List<PostResponse> postResponseList = new ArrayList<>();
 
         for (Post post : posts) {
             User user = userRepository.getById(post.getUserId());
-            PostResponse postResponse = setPostResponse(post, user);
+            PostResponse postResponse = setPostResponse(post, user, loggedInUser);
             postResponseList.add(postResponse);
         }
 
         return postResponseList;
     }
 
-    private PostResponse setPostResponse(Post post, User user) throws Exception {
+    private PostResponse setPostResponse(Post post, User user, User loggedInUser) throws Exception {
         byte[] profileImageByte = null;
         if (StringUtils.isNotBlank(user.getProfilePicturePath())) {
             profileImageByte = Files.readAllBytes(Paths.get(user.getProfilePicturePath()));
@@ -61,6 +65,8 @@ public class PostServiceImpl implements PostService {
                 .userId(post.getUserId())
                 .username(user.getUsername())
                 .profilePicture(profileImageByte)
+                .hasLiked(likeRepository.existsByPostIdAndUserId(post.getId(), loggedInUser.getId()))
+                .likeCount(likeRepository.countByPostId(post.getId()))
                 .build();
     }
 }

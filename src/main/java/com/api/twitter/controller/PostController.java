@@ -37,9 +37,12 @@ public class PostController {
     }
 
     @GetMapping()
-    public ResponseEntity<List<PostResponse>> getAllPosts() throws Exception {
+    public ResponseEntity<List<PostResponse>> getAllPosts(
+            @RequestHeader("Authorization") String userToken
+    ) throws Exception {
         try {
-            List<PostResponse> postResponseList = postService.getAllPosts();
+            User loggedInUser = userService.getUserByTokenId(userToken);
+            List<PostResponse> postResponseList = postService.getAllPosts(loggedInUser);
             return ResponseEntity.ok(postResponseList);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(null);
