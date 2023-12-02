@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.firebase.auth.UserRecord;
@@ -99,6 +101,19 @@ public class UserServiceImpl implements UserService {
                 .followers(followers)
                 .followees(followees)
                 .build();
+    }
+
+    @Override
+    public List<UserDetailResponse> getAllUsers() throws Exception {
+        List<User> users = userRepository.findAll();
+        List<UserDetailResponse> responseList = new ArrayList<>();
+
+        for (User user : users) {
+            UserDetailResponse response = convertToUserResponse(user);
+            responseList.add(response);
+        }
+
+        return responseList;
     }
 
     @Override
